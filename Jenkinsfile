@@ -134,8 +134,8 @@ pipeline {
                 docker ps
 
                 # Pulse?
-                curl -iv --raw http://localhost:8090/parabank
-                curl -iv --raw http://localhost:8050/status
+                # curl -iv --raw http://localhost:8090/parabank
+                # curl -iv --raw http://localhost:8050/status
                 
                 # License SOAtest
                 # Set Up and write .properties file
