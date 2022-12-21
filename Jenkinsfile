@@ -112,6 +112,7 @@ pipeline {
                 -p 8050:8050 \
                 -p 61616:61616 \
                 -p 9001:9001 \
+                --env-file "$PWD/jenkins/jtest/monitor.env" \
                 -v "$PWD/monitor:/home/docker/jtest/monitor" \
                 --name parabankv1 \
                 parasoft/parabank
@@ -123,7 +124,7 @@ pipeline {
             }
         }
         stage('Run Functional Tests') {
-            when { equals expected: true, actual: true}
+            when { equals expected: true, actual: false}
             steps {
                 sh '''
                 echo ${pwd}
@@ -133,11 +134,11 @@ pipeline {
                 docker ps
 
                 # Pulse?
-                # curl -iv --raw http://localhost:8090/parabank
-                # curl -iv --raw http://localhost:8050/status
+                curl -iv --raw http://localhost:8090/parabank
+                curl -iv --raw http://localhost:8050/status
+                
                 # License SOAtest
                 # Set Up and write .properties file
-                
                 echo  -e "\n~~~\nSetting up and creating soatestcli.properties file.\n"
                 echo $"
                 license.network.auth.enabled=true
@@ -167,7 +168,7 @@ pipeline {
                 cp "$PWD/jenkins/soatest"/* "/root/parasoft/soavirt_workspace/TestAssets/"; \
                 soatestcli \
                 -resource /TestAssets \
-                -config 'user://Example Configuration' \
+                -config '/root/parasoft/soavirt_workspace/TestAssets/AppCoverage.properties' \
                 -settings $PWD/jenkins/soatest/soatestcli.properties \
                 -environment 127.17.0.1 \
                 -report $PWD/jenkins/soatest/report"
@@ -178,6 +179,7 @@ pipeline {
             }
         }
         stage('Destroy Contatiners and Clean Up') {
+            when { equals expected: true, actual: false}
             steps {
                 sh '''
                 echo ${pwd}
@@ -188,7 +190,6 @@ pipeline {
             }
         }
         stage('Static Analysis Reports'){
-            
             when { equals expected: true, actual: false}
             steps {
                 echo '---> Parsing static analysis reports'
@@ -233,6 +234,7 @@ pipeline {
         always {
             
             archiveArtifacts artifacts: '**/target/jtest/**, **/soatest/report/**',
+                excludes: '**/cache/**',
                 fingerprint: true, 
                 onlyIfSuccessful: true
         }
