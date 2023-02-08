@@ -18,7 +18,7 @@ pipeline {
 
     }
     stages {
-        stage('Configre Workspace') {
+        stage('Clone Repo') {
             steps {
                 cleanWs()
                 sh '''
@@ -27,13 +27,13 @@ pipeline {
                     
                     git clone -b tia 'https://github.com/gtrofimov/jenkins.git' 
                 
-                    git clone 'https://github.com/parasoft/parabank.git'
+                    git clone -b selenium-demo 'https://github.com/parasoft/parabank.git'
                     ls -la
                 
                    '''
             }
         }
-        stage('Build App') {
+        stage('Build App with Jtest SA') {
             when { equals expected: true, actual: true}
             steps {
                 sh '''
@@ -123,7 +123,7 @@ pipeline {
                 '''
             }
         }
-        stage('Run Functional Tests') {
+        stage('Run SOAtest Tests') {
             when { equals expected: true, actual: true}
             steps {
                 sh '''
