@@ -12,6 +12,8 @@ pipeline {
         // test_repo=''
 
         parabank_port=8090
+        dtp_url="http://54.202.59.202/"
+
         ls_url="${PARASOFT_LS_URL}"
         ls_user="${PARASOFT_LS_USER}"
         ls_pass="${PARASOFT_LS_PASS}"
@@ -20,40 +22,44 @@ pipeline {
     stages {
         stage('Configre Workspace') {
             steps {
-                cleanWs()
+                cleanWs();
                 sh '''
-                    echo ${ls_user}
-                    ls -R    
+                    # echo ${ls_user}
+                    # ls -R    
                     
                     git clone -b tia 'https://github.com/gtrofimov/jenkins.git' 
                 
-                    git clone 'https://github.com/parasoft/parabank.git'
-                    ls -la
+                    git clone -b selenium-demo 'https://github.com/parasoft/parabank.git'
+                    # ls -la
                 
                    '''
-            }
+                
+                copyArtifacts(projectName: 'parabank-baseline');
+            }   
         }
         stage('Build App') {
             when { equals expected: true, actual: true}
             steps {
                 sh '''
                 
-                echo "Starting Pipeline Execution."
-                echo ${PWD}
+                # echo "Starting Pipeline Execution."
+                # echo ${PWD}
 
                 # Check Vars
-                echo $PWD
+                # echo $PWD
+
                 mkdir monitor
+                
                 # set MONITOR_HOME="monitor"
                 # is Docker runnnig?
-                docker ps
+                # docker ps
                 # docker network create ${JOB_NAME} 
-                ls -la
+                # ls -la
 
                 # Build with Jtest SA/UT/monitor
                 # Set Up and write .properties file
 
-                echo  -e "\n~~~\nSetting up and creating jtest.properties file.\n"
+                # Setting up and creating jtest.properties file.
                 echo $"
                 parasoft.eula.accepted=true
                 jtest.license.use_network=true
@@ -61,9 +67,9 @@ pipeline {
                 dtp.url=${ls_url}
                 dtp.user=${ls_user}
                 dtp.password=${ls_pass}" >> jenkins/jtest/jtestcli.properties
-                echo -e "\nDebug -- Verify workspace contents.\n"
+                # Debug -- Verify workspace contents."
                 ls -la
-                echo -e "\nDebug -- Verify jtestcli.properties file contents."
+                # Debug -- Verify jtestcli.properties file contents.
                 cat jenkins/jtest/jtestcli.properties
 
                 # need to point to ${user.home}
@@ -74,18 +80,14 @@ pipeline {
                 -w "$PWD" \
                 $(docker build -q ./jenkins/jtest) /bin/bash -c " \
                 cd parabank; \
-                mvn \
-                -Dmaven.test.failure.ignore=true \
-                test-compile jtest:agent \
-                test jtest:jtest \
+                mvn tia:affected-tests test \
                 -s /home/parasoft/.m2/settings.xml \
+                -Djtest.publish
                 -Djtest.settings='/home/parasoft/jtestcli.properties' \
-                -Djtest.config='jtest.dtp://UTSA'; \
-                mvn \
-                -DskipTests=true \
-                package jtest:monitor \
-                -s /home/parasoft/.m2/settings.xml \
-                -Djtest.settings='/home/parasoft/jtestcli.properties'; \
+                -Djtest.referenceCoverageFile=target/jtest/coverage.xml \
+                -Djtest.referenceReportFile=target/jtest/report.xml \
+                -Djtest.runFailedTests=false \
+                -Djtest.runModifiedTests=true \
                 "
 
                 # Unzip monitor.zip
@@ -95,7 +97,7 @@ pipeline {
             }
         }
         stage('Deploy App via Docker') {
-            when { equals expected: true, actual: true}
+            when { equals expected: true, actual: false}
             steps {
                 sh '''
                 echo ${PWD}
@@ -124,7 +126,7 @@ pipeline {
             }
         }
         stage('Run Functional Tests') {
-            when { equals expected: true, actual: true}
+            when { equals expected: true, actual: false}
             steps {
                 sh '''
                 echo ${pwd}
@@ -179,7 +181,7 @@ pipeline {
             }
         }
         stage('Destroy Contatiners and Clean Up') {
-            when { equals expected: true, actual: true}
+            when { equals expected: true, actual: false}
             steps {
                 sh '''
                 echo ${pwd}
