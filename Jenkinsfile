@@ -12,11 +12,15 @@ pipeline {
         // test_repo=''
 
         parabank_port=8090
-        dtp_url="http://54.202.59.202/"
-
+        project_name="Parabank"
+        dtp_url="https://34.219.101.60:8443"
         ls_url="${PARASOFT_LS_URL}"
         ls_user="${PARASOFT_LS_USER}"
         ls_pass="${PARASOFT_LS_PASS}"
+        buildId="parabank-feature-tia"
+        unitCovImage="${project_name};${project_name}_UnitTest"
+        fucntionalCovImage="${project_name};${project_name}_FunctionalTest"
+        codeCovConfig="jtest.dtp://CalculateApplicationCoverage"
 
     }
     stages {
@@ -64,15 +68,19 @@ pipeline {
                 parasoft.eula.accepted=true
                 jtest.license.use_network=true
                 jtest.license.network.edition=server_edition
-                dtp.url=${ls_url}
-                dtp.user=${ls_user}
-                dtp.password=${ls_pass}" >> jenkins/jtest/jtestcli.properties
-                # Debug -- Verify workspace contents."
-                ls -la
-                # Debug -- Verify jtestcli.properties file contents.
-                cat jenkins/jtest/jtestcli.properties
+                license.network.use.specified.server=true
+                license.network.auth.enabled=true
+                license.network.url=${ls_url}
+                license.network.user=${ls_user}
+                license.network.password=${ls_pass}
+                build.id="${buildId}"
+                dtp.url=${dtp_url}
+                dtp.user=demo
+                dtp.password=demo-user
+                report.coverage.images="${unitCovImage}"
+                dtp.project=${project_name}" >> jenkins/jtest/jtestcli.properties
 
-                # need to point to ${user.home}
+                cat jenkins/jtest/jtestcli.properties
                 
                 docker run --rm -i \
                 -u 0:0 \
@@ -88,6 +96,7 @@ pipeline {
                 -Djtest.referenceReportFile=target/jtest/report.xml \
                 -Djtest.runFailedTests=false \
                 -Djtest.runModifiedTests=true \
+                -Dproperty.report.dtp.publish=true
                 "
 
                 # Unzip monitor.zip
