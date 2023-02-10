@@ -90,13 +90,12 @@ pipeline {
                 cd parabank; \
                 mvn tia:affected-tests test \
                 -s /home/parasoft/.m2/settings.xml \
-                -Djtest.publish
                 -Djtest.settings='/home/parasoft/jtestcli.properties' \
                 -Djtest.referenceCoverageFile=target/jtest/coverage.xml \
                 -Djtest.referenceReportFile=target/jtest/report.xml \
                 -Djtest.runFailedTests=false \
                 -Djtest.runModifiedTests=true \
-                -Dproperty.report.dtp.publish=true
+                -Dproperty.report.dtp.publish=true \
                 "
 
                 # Unzip monitor.zip
