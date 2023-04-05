@@ -17,13 +17,16 @@ jenkins
 ## To Run
 
 1. Install Jenkins on a Linux VM (https://www.jenkins.io/doc/tutorials/tutorial-for-installing-jenkins-on-AWS/#downloading-and-installing-jenkins)
+   1. set jenkis vars
 2. Install Docker (link to Docker install on Linux)
-3. Create Jenkins Pipeline
+3, Install Parasoft DTP
+   1. add configs
+4. Create Jenkins Pipeline
    1. Build
    2. Deploy
    3. Test
    4. Release
-4. Configure licenses for each tool
+5. Configure licenses for each tool
    1. jtest
    2. virt
    3. soatest

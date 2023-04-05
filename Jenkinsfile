@@ -8,7 +8,7 @@ pipeline {
         // App Settings
         parabank_port=8090
         project_name="Parabank_Master"
-        buildId="${project_name}-main"
+        buildId="${project_name}-${BUILD_ID}"
 
         
         // Parasoft Licenses
@@ -24,7 +24,7 @@ pipeline {
         fucntionalCovImage="${project_name};${project_name}_FunctionalTest"
         
         // Parasoft DTP Settings
-        dtp_url="https://34.209.64.10:8443"
+        dtp_url="${dtp_url}"
         dtp_publish=false
 
         }
